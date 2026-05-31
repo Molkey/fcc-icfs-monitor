@@ -47,13 +47,20 @@ def filter_by_date(filings: list[Filing], start_date: date, end_date: date) -> l
 
 def scan_filings(
     companies: list[str], start_date: date, end_date: date, max_per_company: int
-) -> list[Filing]:
+) -> tuple[list[Filing], dict]:
     company_pages = find_company_pages(companies)
     rows: list[Filing] = []
+    raw_count = 0
     for company, url in company_pages.items():
         filings = list_company_filings(company, url, max_per_company)
+        raw_count += len(filings)
         rows.extend(filter_by_date(filings, start_date, end_date))
-    return rows
+    return rows, {
+        "requested_companies": len(companies),
+        "matched_companies": len(company_pages),
+        "checked_filings": raw_count,
+        "matched_filings": len(rows),
+    }
 
 
 def fetch_attachment_bytes(attachment: Attachment) -> tuple[bool, bytes, str | None]:
@@ -226,7 +233,7 @@ with st.sidebar:
     custom_companies = st.text_area("Additional company names", placeholder="One per line")
 
     today = date.today()
-    start_date = st.date_input("Start date", today - timedelta(days=30))
+    start_date = st.date_input("Start date", date(2023, 1, 1))
     end_date = st.date_input("End date", today)
     max_per_company = st.number_input(
         "Max filings per company", min_value=1, max_value=1000, value=200
@@ -255,13 +262,20 @@ if start_date > end_date:
 
 if "filings" not in st.session_state:
     st.session_state.filings = []
+if "search_attempted" not in st.session_state:
+    st.session_state.search_attempted = False
+if "search_summary" not in st.session_state:
+    st.session_state.search_summary = None
 
 if scan_button:
     with st.spinner("Searching FCC.report company pages..."):
         try:
-            st.session_state.filings = scan_filings(
+            filings_result, search_summary = scan_filings(
                 companies, start_date, end_date, int(max_per_company)
             )
+            st.session_state.filings = filings_result
+            st.session_state.search_summary = search_summary
+            st.session_state.search_attempted = True
             st.session_state.pop("zip_data", None)
             st.session_state.pop("zip_name", None)
         except Exception as exc:
@@ -271,6 +285,14 @@ if scan_button:
 filings: list[Filing] = st.session_state.filings
 
 st.subheader("Results")
+if st.session_state.search_summary:
+    summary = st.session_state.search_summary
+    st.caption(
+        f"Matched companies: {summary['matched_companies']}/{summary['requested_companies']} | "
+        f"Checked filings: {summary['checked_filings']} | "
+        f"Filings in date range: {summary['matched_filings']}"
+    )
+
 if filings:
     st.dataframe(
         [
@@ -286,6 +308,11 @@ if filings:
         ],
         use_container_width=True,
         hide_index=True,
+    )
+elif st.session_state.search_attempted:
+    st.warning(
+        "No filings were found in that date range. Try widening the dates or increasing "
+        "Max filings per company."
     )
 else:
     st.info("Choose companies and dates, then click Find filings in date range.")
