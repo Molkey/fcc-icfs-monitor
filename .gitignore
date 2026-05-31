@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local downloads and generated state
+fcc_documents/
+fcc_documents_test/
+fcc_documents_validation/
+fcc_monitor_state*.json
+*.tmp
+
+# Local test artifacts
+hello_world.py
+older_test.pdf
+direct_test.pdf
+
+# Local-only configs used while testing
+config.download_test.json
+config.quick.json
+config.validation.json
+config.gui.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

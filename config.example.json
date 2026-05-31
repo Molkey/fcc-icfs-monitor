@@ -1,0 +1,12 @@
+{
+  "companies": [
+    "SpaceX Services Inc",
+    "Kuiper Systems Llc",
+    "Ast Science"
+  ],
+  "output_dir": "fcc_documents",
+  "state_file": "fcc_monitor_state.json",
+  "max_filings_per_company": 25,
+  "download_attachments": true,
+  "pause_seconds": 1.5
+}
