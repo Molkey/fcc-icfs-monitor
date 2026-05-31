@@ -340,6 +340,5 @@ if st.session_state.get("zip_data"):
 
 st.warning(
     "Some FCC/FCC.report attachment links return ICFS login HTML instead of a real PDF. "
-    "Those files are included as .html diagnostics instead of being mislabeled as PDFs.",
-    icon="!",
+    "Those files are included as .html diagnostics instead of being mislabeled as PDFs."
 )
