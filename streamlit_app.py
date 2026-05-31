@@ -27,6 +27,7 @@ DEFAULT_COMPANIES = {
     "Amazon / Project Kuiper": "Kuiper Systems Llc",
     "AST SpaceMobile": "Ast Science",
 }
+FCC_REPORT_LEGACY_CUTOFF = date(2023, 6, 14)
 
 
 def default_output_dir() -> str:
@@ -256,6 +257,13 @@ with col1:
 with col2:
     st.caption("For Streamlit Cloud, use Browser ZIP download.")
 
+if end_date > FCC_REPORT_LEGACY_CUTOFF:
+    st.warning(
+        "This app currently searches FCC.report's legacy IBFS mirror. That mirror appears "
+        "to stop around June 2023 for many ICFS/IBFS filing lists, so 2024+ ICFS filings "
+        "may not appear here even though they exist on FCC systems and in FCC public notices."
+    )
+
 if start_date > end_date:
     st.error("Start date cannot be later than end date.")
     st.stop()
@@ -314,6 +322,13 @@ elif st.session_state.search_attempted:
         "No filings were found in that date range. Try widening the dates or increasing "
         "Max filings per company."
     )
+    if end_date > FCC_REPORT_LEGACY_CUTOFF:
+        st.info(
+            "For 2024 SpaceX examples, FCC public documents reference ICFS file numbers "
+            "such as SAT-AMD-20240322-00061, SAT-MOD-20240423-00089, and "
+            "SAT-AMD-20241017-00228. These are not reliably present in the FCC.report "
+            "legacy IBFS mirror used by this version of the app."
+        )
 else:
     st.info("Choose companies and dates, then click Find filings in date range.")
 
